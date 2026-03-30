@@ -6,8 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "test:jest": "jest",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
     "lint": "ng lint",
     "start:dynamic": "ng serve ${windir:+--poll 2000}"
   },
@@ -67,6 +67,7 @@
     "prettier-eslint": "~16.3.0",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "ts-jest": "^29.4.9",
+    "ts-node": "^10.9.2",
     "typescript": "~5.9.2"
   }
 }
