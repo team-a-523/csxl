@@ -35,7 +35,10 @@ describe('CloseTicketDialog', () => {
   let fixture: ComponentFixture<CloseTicketDialog>;
 
   const myCoursesServiceMock = {
-    closeTicket: jest.fn(() => of(MOCK_TICKET_OVERVIEW))
+    closeTicket: jest.fn(
+      (_ticketId: number, _hasConcerns: boolean, _notes: string) =>
+        of(MOCK_TICKET_OVERVIEW)
+    )
   };
 
   const dialogRefMock = {
@@ -127,7 +130,7 @@ describe('CloseTicketDialog', () => {
       expect(myCoursesServiceMock.closeTicket).toHaveBeenCalledWith(
         42,
         false,
-        expect.any(String)
+        (expect as any).any(String)
       );
     }));
 
@@ -138,7 +141,7 @@ describe('CloseTicketDialog', () => {
 
       expect(myCoursesServiceMock.closeTicket).toHaveBeenCalledWith(
         42,
-        expect.any(Boolean),
+        (expect as any).any(Boolean),
         ''
       );
     }));
