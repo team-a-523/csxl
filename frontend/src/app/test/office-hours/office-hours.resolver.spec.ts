@@ -69,7 +69,7 @@ describe('officeHoursResolver', () => {
     TestBed.runInInjectionContext(() => {
       const result = officeHoursResolver(route, {} as RouterStateSnapshot);
 
-      expect(result).toMatchObject({
+      (expect as any)(result).toMatchObject({
         id: -1,
         type: 0,
         mode: 0,

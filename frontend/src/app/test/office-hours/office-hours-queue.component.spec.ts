@@ -66,15 +66,19 @@ describe('OfficeHoursQueueComponent', () => {
   const queueResponse = makeQueue();
 
   const myCoursesServiceMock = {
-    getOfficeHoursQueue: jest.fn(() => of(queueResponse)),
-    callTicket: jest.fn(() => of(MOCK_TICKET)),
-    cancelTicket: jest.fn(() => of(MOCK_TICKET))
+    getOfficeHoursQueue: jest.fn((_officeHoursEventId: number) =>
+      of(queueResponse)
+    ),
+    callTicket: jest.fn((_ticketId: number) => of(MOCK_TICKET)),
+    cancelTicket: jest.fn((_ticketId: number) => of(MOCK_TICKET))
   };
 
   const snackBarMock = { open: jest.fn() };
 
   const dialogMock = {
-    open: jest.fn(() => ({ afterClosed: () => of(undefined) }))
+    open: jest.fn((_component: any, _config?: any) => ({
+      afterClosed: () => of(undefined)
+    }))
   };
 
   beforeEach(() => {
@@ -321,7 +325,7 @@ describe('OfficeHoursQueueComponent', () => {
 
       expect(dialogMock.open).toHaveBeenCalledWith(
         CloseTicketDialog,
-        expect.objectContaining({ data: MOCK_TICKET.id })
+        (expect as any).objectContaining({ data: MOCK_TICKET.id })
       );
     });
 
