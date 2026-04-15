@@ -62,8 +62,10 @@ describe('OfficeHoursGetHelpComponent', () => {
   const baseOverview = makeGetHelpOverview();
 
   const myCoursesServiceMock = {
-    getOfficeHoursHelpOverview: jest.fn(() => of(baseOverview)),
-    cancelTicket: jest.fn(() => of(MOCK_TICKET)),
+    getOfficeHoursHelpOverview: jest.fn((_officeHoursEventId: number) =>
+      of(baseOverview)
+    ),
+    cancelTicket: jest.fn((_ticketId: number) => of(MOCK_TICKET)),
     createTicket: jest.fn(() => of(MOCK_TICKET))
   };
 

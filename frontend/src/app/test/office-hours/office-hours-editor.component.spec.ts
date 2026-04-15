@@ -236,7 +236,7 @@ describe('OfficeHoursEditorComponent (new)', () => {
     it('returns all rooms when input is empty', () => {
       component.input = { nativeElement: { value: '' } } as any;
       component.filterRooms();
-      expect(component.filteredRooms).toHaveLength(2);
+      expect(component.filteredRooms.length).toBe(2);
     });
   });
 

@@ -31,7 +31,9 @@ describe('OfficeHourEventCardWidget', () => {
   let fixture: ComponentFixture<OfficeHourEventCardWidget>;
 
   const myCoursesServiceMock = {
-    getOfficeHoursRole: jest.fn(() => of({ role: 'UTA' }))
+    getOfficeHoursRole: jest.fn((_officeHoursEventId: number) =>
+      of({ role: 'UTA' })
+    )
   };
 
   beforeEach(() => {

@@ -76,17 +76,25 @@ describe('OfficeHoursPageComponent', () => {
   let httpTestingController: HttpTestingController;
 
   const myCoursesServiceMock = {
-    getCurrentOfficeHourEvents: jest.fn(() => of([])),
+    getCurrentOfficeHourEvents: jest.fn((_courseSiteId: string) => of([])),
     getTermOverviews: jest.fn(() => of(MOCK_TERMS)),
-    deleteOfficeHours: jest.fn(() => of(undefined))
+    deleteOfficeHours: jest.fn((_siteId: number, _officeHoursId: number) =>
+      of(undefined)
+    )
   };
 
   const snackBarMock = {
-    open: jest.fn(() => ({ onAction: () => of() }))
+    open: jest.fn(
+      (_message: string, _action?: string, _config?: any) => ({
+        onAction: () => of()
+      })
+    )
   };
 
   const dialogMock = {
-    open: jest.fn(() => ({ afterClosed: () => of(undefined) }))
+    open: jest.fn((_component: any, _config?: any) => ({
+      afterClosed: () => of(undefined)
+    }))
   };
 
   function flushPaginators() {
@@ -247,7 +255,7 @@ describe('OfficeHoursPageComponent', () => {
 
       expect(dialogMock.open).toHaveBeenCalledWith(
         DeleteRecurringEventDialog,
-        expect.objectContaining({
+        (expect as any).objectContaining({
           data: { siteId: '42', officeHours: recurringEvent }
         })
       );
@@ -285,7 +293,7 @@ describe('OfficeHoursPageComponent', () => {
       expect(snackBarMock.open).toHaveBeenCalledWith(
         'Are you sure you want to delete this office hours event?',
         'Delete',
-        expect.any(Object)
+        (expect as any).any(Object)
       );
     });
 
@@ -333,7 +341,7 @@ describe('OfficeHoursPageComponent', () => {
       expect(snackBarMock.open).toHaveBeenCalledWith(
         'The office hours has been deleted.',
         '',
-        expect.any(Object)
+        (expect as any).any(Object)
       );
     }));
   });
