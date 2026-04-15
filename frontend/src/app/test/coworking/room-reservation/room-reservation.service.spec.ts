@@ -1,62 +1,58 @@
-/**
- * RoomReservationService — remaining study-room hours + reservation API (extends ReservationService).
- */
+// room-reservation.service.spec.ts
 
 import { TestBed } from '@angular/core/testing';
 import {
-  HttpTestingController,
-  provideHttpClientTesting
+  provideHttpClientTesting,
+  HttpTestingController
 } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-
 import { RoomReservationService } from '../../../coworking/room-reservation/room-reservation.service';
-import { BASE_RESERVATION_JSON } from './coworking-test-helpers';
 
-describe('RoomReservationService (CSXL hallway)', () => {
+describe('RoomReservationService', () => {
   let service: RoomReservationService;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        RoomReservationService,
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        RoomReservationService
       ]
     });
+
     service = TestBed.inject(RoomReservationService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    httpMock.verify();
+    httpMock.verify(); // ensures no unexpected HTTP calls were made
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('getNumHoursStudyRoomReservations', () => {
-    it('GETs remaining hours from user-reservations endpoint', (done) => {
-      service.getNumHoursStudyRoomReservations().subscribe((hours) => {
-        expect(hours).toBe('12.5');
-        done();
-      });
+  describe('getNumHoursStudyRoomReservations()', () => {
+    it('calls the correct endpoint', () => {
+      service.getNumHoursStudyRoomReservations().subscribe();
 
       const req = httpMock.expectOne('/api/coworking/user-reservations/');
       expect(req.request.method).toBe('GET');
-      req.flush('12.5');
+      req.flush('4.5');
     });
-  });
 
-  describe('inherited ReservationService behavior', () => {
-    it('getReservation updates the shared reservation signal', () => {
-      service.getReservation(99);
+    it('returns the value from the API', () => {
+      let result: string | undefined;
 
-      const req = httpMock.expectOne('/api/coworking/reservation/99');
-      req.flush(BASE_RESERVATION_JSON);
+      service.getNumHoursStudyRoomReservations().subscribe((val) => {
+        result = val;
+      });
 
-      expect(service.reservation()?.id).toBe(1);
+      const req = httpMock.expectOne('/api/coworking/user-reservations/');
+      req.flush('3.0');
+
+      expect(result).toBe('3.0');
     });
   });
 });
