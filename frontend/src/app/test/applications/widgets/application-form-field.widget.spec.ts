@@ -14,6 +14,7 @@ import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormGroupDirective,
+  FormControl,
   FormGroup
 } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
@@ -83,7 +84,9 @@ describe('ApplicationFormFieldWidget', () => {
 
     // FormGroupDirective needs a FormGroup to be bound to the host element.
     const formGroupDirective = new FormGroupDirective([], []);
-    formGroupDirective.form = new FormGroup({});
+    formGroupDirective.form = new FormGroup({
+      intro_video_url: new FormControl('')
+    });
 
     await TestBed.configureTestingModule({
       declarations: [ApplicationFormFieldWidget],

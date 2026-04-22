@@ -380,8 +380,7 @@ describe('ApplicationFormComponent', () => {
   });
 
   it('does not submit when form is invalid', () => {
-    // formGroup starts invalid (all empty strings, required fields unfulfilled)
-    // Do NOT set any values
+    component.formGroup.get('intro_video_url')?.setErrors({ required: true });
     component.onSubmit();
 
     expect(mockApplicationsService.createApplication).not.toHaveBeenCalled();
