@@ -1,369 +1,389 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { of, throwError } from 'rxjs';
 import {
-  coursesResolver,
+  ActivatedRouteSnapshot,
+  convertToParamMap,
+  ResolveFn,
+  RouterStateSnapshot
+} from '@angular/router';
+import { Observable, firstValueFrom, isObservable, of, throwError } from 'rxjs';
+import {
   courseResolver,
-  termsResolver,
+  coursesResolver,
   currentTermResolver,
-  termResolver,
+  roomResolver,
+  roomsResolver,
   sectionResolver,
   sectionsResolver,
-  roomsResolver,
-  roomResolver
+  termResolver,
+  termsResolver
 } from 'src/app/academics/academics.resolver';
 import { AcademicsService } from 'src/app/academics/academics.service';
 import { Course, Room, Section, Term } from 'src/app/academics/academics.models';
 
-const mockCourses: Course[] = [
-  {
-    id: 'comp523',
-    subject_code: 'COMP',
-    number: '523',
-    title: 'Software Engineering Lab',
-    description: 'Team-based software engineering.',
-    credit_hours: 3,
-    sections: null
-  }
-];
+const MOCK_TERM: Term = {
+  id: '24F',
+  name: 'Fall 2024',
+  start: new Date('2024-08-15'),
+  end: new Date('2024-12-15'),
+  applications_open: new Date('2024-03-01'),
+  applications_close: new Date('2024-04-01')
+};
 
-const mockTerms: Term[] = [
-  {
-    id: 'SP26',
-    name: 'Spring 2026',
-    start: new Date('2026-01-14'),
-    end: new Date('2026-05-06'),
-    applications_open: new Date('2025-10-01'),
-    applications_close: new Date('2025-11-01')
-  }
-];
+const MOCK_COURSE: Course = {
+  id: 'COMP110',
+  subject_code: 'COMP',
+  number: '110',
+  title: 'Intro Programming',
+  description: 'Fundamentals course',
+  credit_hours: 3,
+  sections: null
+};
 
-const mockSection: Section = {
+const MOCK_ROOM: Room = {
+  id: 'SN014',
+  nickname: 'Sitterson 014',
+  building: 'SN',
+  room: '014',
+  capacity: 100,
+  reservable: true,
+  seats: []
+};
+
+const MOCK_SECTION: Section = {
   id: 1,
-  course_id: 'comp523',
+  course_id: 'COMP110',
   number: '001',
-  term_id: 'SP26',
-  meeting_pattern: 'MWF 10:00-10:50',
+  term_id: '24F',
+  meeting_pattern: 'MWF 9:05-9:55',
   course: null,
   term: null,
   staff: [],
-  lecture_room: null,
+  lecture_room: MOCK_ROOM,
   office_hour_rooms: [],
   override_title: '',
   override_description: '',
-  enrolled: 10,
-  total_seats: 30
+  enrolled: 80,
+  total_seats: 100
 };
 
-const mockRoom: Room = {
-  id: 'SN0115',
-  nickname: 'Sitterson 115',
-  building: 'Sitterson',
-  room: '0115',
-  capacity: 30,
-  reservable: false,
-  seats: null
-};
+describe('academics resolvers', () => {
+  let academicsServiceMock: {
+    getCourses: jest.Mock;
+    getCourse: jest.Mock;
+    getTerms: jest.Mock;
+    getCurrentTerm: jest.Mock;
+    getTerm: jest.Mock;
+    getSection: jest.Mock;
+    getSectionsByTerm24F: jest.Mock;
+    getRooms: jest.Mock;
+    getRoom: jest.Mock;
+  };
 
-function buildRoute(id: string): ActivatedRouteSnapshot {
-  return {
-    paramMap: {
-      get: (key: string) => (key === 'id' ? id : null)
-    }
-  } as unknown as ActivatedRouteSnapshot;
-}
+  const makeRoute = (id: string): ActivatedRouteSnapshot =>
+    ({
+      paramMap: convertToParamMap({ id })
+    }) as ActivatedRouteSnapshot;
 
-const mockState = {} as RouterStateSnapshot;
-
-describe('Academics Resolvers', () => {
-  let academicsServiceMock: any;
+  const state = {} as RouterStateSnapshot;
+  const resolveValue = <T>(value: T | Promise<T> | Observable<T>) =>
+    isObservable(value) ? firstValueFrom(value) : Promise.resolve(value);
 
   beforeEach(() => {
     academicsServiceMock = {
-      getCourses: jest.fn().mockReturnValue(of(mockCourses)),
-      getCourse: jest.fn((_id: string) => of(mockCourses[0])),
-      getTerms: jest.fn().mockReturnValue(of(mockTerms)),
-      getCurrentTerm: jest.fn().mockReturnValue(of(mockTerms[0])),
-      getTerm: jest.fn((_id: string) => of(mockTerms[0])),
-      getSection: jest.fn((_id: number) => of(mockSection)),
-      getSectionsByTerm24F: jest.fn().mockReturnValue(of([mockSection])),
-      getRooms: jest.fn().mockReturnValue(of([mockRoom])),
-      getRoom: jest.fn((_id: string) => of(mockRoom))
+      getCourses: jest.fn(),
+      getCourse: jest.fn(),
+      getTerms: jest.fn(),
+      getCurrentTerm: jest.fn(),
+      getTerm: jest.fn(),
+      getSection: jest.fn(),
+      getSectionsByTerm24F: jest.fn(),
+      getRooms: jest.fn(),
+      getRoom: jest.fn()
     };
 
     TestBed.configureTestingModule({
-      providers: [
-        { provide: AcademicsService, useValue: academicsServiceMock }
-      ]
+      providers: [{ provide: AcademicsService, useValue: academicsServiceMock }]
     });
   });
 
-  describe('coursesResolver', () => {
-    it('should call getCourses() and return the result', (done) => {
-      const route = buildRoute('');
-
-      TestBed.runInInjectionContext(() => {
-        (coursesResolver(route, mockState) as any).subscribe(
-          (result: Course[]) => {
-            expect(academicsServiceMock.getCourses).toHaveBeenCalledTimes(1);
-            expect(result).toEqual(mockCourses);
-            done();
-          }
-        );
-      });
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  describe('courseResolver', () => {
-    it('should return a blank course when id is "new"', () => {
-      const route = buildRoute('new');
-
-      TestBed.runInInjectionContext(() => {
-        const result = courseResolver(route, mockState) as Course;
-        expect(result.id).toBe('');
-        expect(result.subject_code).toBe('');
-        expect(result.credit_hours).toBe(-1);
-        expect(result.sections).toBeNull();
-      });
-    });
-
-    it('should call getCourse() with the id when id is not "new"', (done) => {
-      const route = buildRoute('comp523');
-
-      TestBed.runInInjectionContext(() => {
-        (courseResolver(route, mockState) as any).subscribe(
-          (result: Course) => {
-            expect(academicsServiceMock.getCourse).toHaveBeenCalledWith(
-              'comp523'
-            );
-            expect(result).toEqual(mockCourses[0]);
-            done();
-          }
-        );
-      });
-    });
-
-    it('should return undefined when getCourse() fails', (done) => {
-      academicsServiceMock.getCourse.mockReturnValue(
-        throwError(() => new Error('Not found'))
-      );
-      const route = buildRoute('comp523');
-
-      TestBed.runInInjectionContext(() => {
-        (courseResolver(route, mockState) as any).subscribe(
-          (result: Course | undefined) => {
-            expect(result).toBeUndefined();
-            done();
-          }
-        );
-      });
-    });
+  it('should create testing module with resolver dependencies', () => {
+    expect(TestBed.inject(AcademicsService)).toBeTruthy();
   });
 
-  describe('termsResolver', () => {
-    it('should call getTerms() and return the result', (done) => {
-      const route = buildRoute('');
+  it('coursesResolver returns courses from service', async () => {
+    academicsServiceMock.getCourses.mockReturnValue(of([MOCK_COURSE]));
 
-      TestBed.runInInjectionContext(() => {
-        (termsResolver(route, mockState) as any).subscribe((result: Term[]) => {
-          expect(academicsServiceMock.getTerms).toHaveBeenCalledTimes(1);
-          expect(result).toEqual(mockTerms);
-          done();
-        });
-      });
-    });
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        coursesResolver(makeRoute('ignored'), state) as
+          | Course[]
+          | Promise<Course[]>
+          | Observable<Course[]>
+      )
+    );
+
+    await expect(result).resolves.toEqual([MOCK_COURSE]);
+    expect(academicsServiceMock.getCourses).toHaveBeenCalled();
   });
 
-  describe('currentTermResolver', () => {
-    it('should call getCurrentTerm() and return the result', (done) => {
-      const route = buildRoute('');
+  it('courseResolver returns blank course when id is new', () => {
+    const result = TestBed.runInInjectionContext(() =>
+      courseResolver(makeRoute('new'), state)
+    ) as Course;
 
-      TestBed.runInInjectionContext(() => {
-        (currentTermResolver(route, mockState) as any).subscribe(
-          (result: Term) => {
-            expect(academicsServiceMock.getCurrentTerm).toHaveBeenCalledTimes(
-              1
-            );
-            expect(result).toEqual(mockTerms[0]);
-            done();
-          }
-        );
-      });
-    });
-
-    it('should return undefined when getCurrentTerm() fails', (done) => {
-      academicsServiceMock.getCurrentTerm.mockReturnValue(
-        throwError(() => new Error('Not found'))
-      );
-      const route = buildRoute('');
-
-      TestBed.runInInjectionContext(() => {
-        (currentTermResolver(route, mockState) as any).subscribe(
-          (result: Term | undefined) => {
-            expect(result).toBeUndefined();
-            done();
-          }
-        );
-      });
-    });
+    expect(result.id).toBe('');
+    expect(result.credit_hours).toBe(-1);
+    expect(academicsServiceMock.getCourse).not.toHaveBeenCalled();
   });
 
-  describe('termResolver', () => {
-    it('should return a blank term when id is "new"', () => {
-      const route = buildRoute('new');
+  it('courseResolver returns course from service when id exists', async () => {
+    academicsServiceMock.getCourse.mockReturnValue(of(MOCK_COURSE));
 
-      TestBed.runInInjectionContext(() => {
-        const result = termResolver(route, mockState) as Term;
-        expect(result.id).toBe('');
-        expect(result.name).toBe('');
-      });
-    });
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        courseResolver(makeRoute('COMP110'), state) as
+          | Course
+          | Promise<Course | undefined>
+          | Observable<Course | undefined>
+      )
+    );
 
-    it('should call getTerm() with the id when id is not "new"', (done) => {
-      const route = buildRoute('SP26');
-
-      TestBed.runInInjectionContext(() => {
-        (termResolver(route, mockState) as any).subscribe((result: Term) => {
-          expect(academicsServiceMock.getTerm).toHaveBeenCalledWith('SP26');
-          expect(result).toEqual(mockTerms[0]);
-          done();
-        });
-      });
-    });
-
-    it('should return undefined when getTerm() fails', (done) => {
-      academicsServiceMock.getTerm.mockReturnValue(
-        throwError(() => new Error('Not found'))
-      );
-      const route = buildRoute('SP26');
-
-      TestBed.runInInjectionContext(() => {
-        (termResolver(route, mockState) as any).subscribe(
-          (result: Term | undefined) => {
-            expect(result).toBeUndefined();
-            done();
-          }
-        );
-      });
-    });
+    await expect(result).resolves.toEqual(MOCK_COURSE);
+    expect(academicsServiceMock.getCourse).toHaveBeenCalledWith('COMP110');
   });
 
-  describe('sectionResolver', () => {
-    it('should return a blank section when id is "new"', () => {
-      const route = buildRoute('new');
+  it('courseResolver returns undefined on service error', async () => {
+    academicsServiceMock.getCourse.mockReturnValue(
+      throwError(() => new Error('getCourse failed'))
+    );
 
-      TestBed.runInInjectionContext(() => {
-        const result = sectionResolver(route, mockState) as Section;
-        expect(result.id).toBeNull();
-        expect(result.course_id).toBe('');
-        expect(result.number).toBe('');
-        expect(result.override_title).toBe('');
-        expect(result.override_description).toBe('');
-      });
-    });
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        courseResolver(makeRoute('COMP999'), state) as
+          | Course
+          | Promise<Course | undefined>
+          | Observable<Course | undefined>
+      )
+    );
 
-    it('should call getSection() with the numeric id when id is not "new"', (done) => {
-      const route = buildRoute('1');
-
-      TestBed.runInInjectionContext(() => {
-        (sectionResolver(route, mockState) as any).subscribe(
-          (result: Section) => {
-            expect(academicsServiceMock.getSection).toHaveBeenCalledWith(1);
-            expect(result).toEqual(mockSection);
-            done();
-          }
-        );
-      });
-    });
-
-    it('should return undefined when getSection() fails', (done) => {
-      academicsServiceMock.getSection.mockReturnValue(
-        throwError(() => new Error('Not found'))
-      );
-      const route = buildRoute('1');
-
-      TestBed.runInInjectionContext(() => {
-        (sectionResolver(route, mockState) as any).subscribe(
-          (result: Section | undefined) => {
-            expect(result).toBeUndefined();
-            done();
-          }
-        );
-      });
-    });
+    await expect(result).resolves.toBeUndefined();
   });
 
-  describe('sectionsResolver', () => {
-    it('should call getSectionsByTerm24F() and return the result', (done) => {
-      const route = buildRoute('');
+  it('termsResolver returns terms from service', async () => {
+    academicsServiceMock.getTerms.mockReturnValue(of([MOCK_TERM]));
 
-      TestBed.runInInjectionContext(() => {
-        (sectionsResolver!(route, mockState) as any).subscribe(
-          (result: Section[]) => {
-            expect(
-              academicsServiceMock.getSectionsByTerm24F
-            ).toHaveBeenCalledTimes(1);
-            expect(result).toEqual([mockSection]);
-            done();
-          }
-        );
-      });
-    });
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        termsResolver(makeRoute('ignored'), state) as
+          | Term[]
+          | Promise<Term[]>
+          | Observable<Term[]>
+      )
+    );
+
+    await expect(result).resolves.toEqual([MOCK_TERM]);
+    expect(academicsServiceMock.getTerms).toHaveBeenCalled();
   });
 
-  describe('roomsResolver', () => {
-    it('should call getRooms() and return the result', (done) => {
-      const route = buildRoute('');
+  it('currentTermResolver returns current term from service', async () => {
+    academicsServiceMock.getCurrentTerm.mockReturnValue(of(MOCK_TERM));
 
-      TestBed.runInInjectionContext(() => {
-        (roomsResolver(route, mockState) as any).subscribe((result: Room[]) => {
-          expect(academicsServiceMock.getRooms).toHaveBeenCalledTimes(1);
-          expect(result).toEqual([mockRoom]);
-          done();
-        });
-      });
-    });
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        currentTermResolver(makeRoute('ignored'), state) as
+          | Term
+          | Promise<Term | undefined>
+          | Observable<Term | undefined>
+      )
+    );
+
+    await expect(result).resolves.toEqual(MOCK_TERM);
+    expect(academicsServiceMock.getCurrentTerm).toHaveBeenCalled();
   });
 
-  describe('roomResolver', () => {
-    it('should return a blank room when id is "new"', () => {
-      const route = buildRoute('new');
+  it('currentTermResolver returns undefined on service error', async () => {
+    academicsServiceMock.getCurrentTerm.mockReturnValue(
+      throwError(() => new Error('getCurrentTerm failed'))
+    );
 
-      TestBed.runInInjectionContext(() => {
-        const result = roomResolver(route, mockState) as Room;
-        expect(result.id).toBe('');
-        expect(result.nickname).toBe('');
-        expect(result.capacity).toBe(100);
-      });
-    });
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        currentTermResolver(makeRoute('ignored'), state) as
+          | Term
+          | Promise<Term | undefined>
+          | Observable<Term | undefined>
+      )
+    );
 
-    it('should call getRoom() with the id when id is not "new"', (done) => {
-      const route = buildRoute('SN0115');
+    await expect(result).resolves.toBeUndefined();
+  });
 
-      TestBed.runInInjectionContext(() => {
-        (roomResolver(route, mockState) as any).subscribe((result: Room) => {
-          expect(academicsServiceMock.getRoom).toHaveBeenCalledWith('SN0115');
-          expect(result).toEqual(mockRoom);
-          done();
-        });
-      });
-    });
+  it('termResolver returns blank term when id is new', () => {
+    const result = TestBed.runInInjectionContext(() =>
+      termResolver(makeRoute('new'), state)
+    ) as Term & { course_sections: null };
 
-    it('should return undefined when getRoom() fails', (done) => {
-      academicsServiceMock.getRoom.mockReturnValue(
-        throwError(() => new Error('Not found'))
-      );
-      const route = buildRoute('SN0115');
+    expect(result.id).toBe('');
+    expect(result.name).toBe('');
+    expect(result.course_sections).toBeNull();
+    expect(academicsServiceMock.getTerm).not.toHaveBeenCalled();
+  });
 
-      TestBed.runInInjectionContext(() => {
-        (roomResolver(route, mockState) as any).subscribe(
-          (result: Room | undefined) => {
-            expect(result).toBeUndefined();
-            done();
-          }
-        );
-      });
-    });
+  it('termResolver returns term from service when id exists', async () => {
+    academicsServiceMock.getTerm.mockReturnValue(of(MOCK_TERM));
+
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        termResolver(makeRoute('24F'), state) as
+          | Term
+          | Promise<Term | undefined>
+          | Observable<Term | undefined>
+      )
+    );
+
+    await expect(result).resolves.toEqual(MOCK_TERM);
+    expect(academicsServiceMock.getTerm).toHaveBeenCalledWith('24F');
+  });
+
+  it('termResolver returns undefined on service error', async () => {
+    academicsServiceMock.getTerm.mockReturnValue(
+      throwError(() => new Error('getTerm failed'))
+    );
+
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        termResolver(makeRoute('BAD'), state) as
+          | Term
+          | Promise<Term | undefined>
+          | Observable<Term | undefined>
+      )
+    );
+
+    await expect(result).resolves.toBeUndefined();
+  });
+
+  it('sectionResolver returns blank section when id is new', () => {
+    const result = TestBed.runInInjectionContext(() =>
+      sectionResolver(makeRoute('new'), state)
+    ) as Section;
+
+    expect(result.id).toBeNull();
+    expect(result.staff).toEqual([]);
+    expect(result.office_hour_rooms).toEqual([]);
+    expect(academicsServiceMock.getSection).not.toHaveBeenCalled();
+  });
+
+  it('sectionResolver returns section from service when id exists', async () => {
+    academicsServiceMock.getSection.mockReturnValue(of(MOCK_SECTION));
+
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        sectionResolver(makeRoute('1'), state) as
+          | Section
+          | Promise<Section | undefined>
+          | Observable<Section | undefined>
+      )
+    );
+
+    await expect(result).resolves.toEqual(MOCK_SECTION);
+    expect(academicsServiceMock.getSection).toHaveBeenCalledWith(1);
+  });
+
+  it('sectionResolver returns undefined on service error', async () => {
+    academicsServiceMock.getSection.mockReturnValue(
+      throwError(() => new Error('getSection failed'))
+    );
+
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        sectionResolver(makeRoute('1'), state) as
+          | Section
+          | Promise<Section | undefined>
+          | Observable<Section | undefined>
+      )
+    );
+
+    await expect(result).resolves.toBeUndefined();
+  });
+
+  it('sectionsResolver returns sections from hardcoded term service call', async () => {
+    academicsServiceMock.getSectionsByTerm24F.mockReturnValue(of([MOCK_SECTION]));
+
+    const resolver = sectionsResolver as ResolveFn<Section[]>;
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        resolver(makeRoute('ignored'), state) as
+          | Section[]
+          | Promise<Section[]>
+          | Observable<Section[]>
+      )
+    );
+
+    await expect(result).resolves.toEqual([MOCK_SECTION]);
+    expect(academicsServiceMock.getSectionsByTerm24F).toHaveBeenCalled();
+  });
+
+  it('roomsResolver returns rooms from service', async () => {
+    academicsServiceMock.getRooms.mockReturnValue(of([MOCK_ROOM]));
+
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        roomsResolver(makeRoute('ignored'), state) as
+          | Room[]
+          | Promise<Room[]>
+          | Observable<Room[]>
+      )
+    );
+
+    await expect(result).resolves.toEqual([MOCK_ROOM]);
+    expect(academicsServiceMock.getRooms).toHaveBeenCalled();
+  });
+
+  it('roomResolver returns blank room when id is new', () => {
+    const result = TestBed.runInInjectionContext(() =>
+      roomResolver(makeRoute('new'), state)
+    ) as Room;
+
+    expect(result.id).toBe('');
+    expect(result.capacity).toBe(100);
+    expect(result.seats).toEqual([]);
+    expect(academicsServiceMock.getRoom).not.toHaveBeenCalled();
+  });
+
+  it('roomResolver returns room from service when id exists', async () => {
+    academicsServiceMock.getRoom.mockReturnValue(of(MOCK_ROOM));
+
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        roomResolver(makeRoute('SN014'), state) as
+          | Room
+          | Promise<Room | undefined>
+          | Observable<Room | undefined>
+      )
+    );
+
+    await expect(result).resolves.toEqual(MOCK_ROOM);
+    expect(academicsServiceMock.getRoom).toHaveBeenCalledWith('SN014');
+  });
+
+  it('roomResolver returns undefined on service error', async () => {
+    academicsServiceMock.getRoom.mockReturnValue(
+      throwError(() => new Error('getRoom failed'))
+    );
+
+    const result = TestBed.runInInjectionContext(() =>
+      resolveValue(
+        roomResolver(makeRoute('SN099'), state) as
+          | Room
+          | Promise<Room | undefined>
+          | Observable<Room | undefined>
+      )
+    );
+
+    await expect(result).resolves.toBeUndefined();
   });
 });
