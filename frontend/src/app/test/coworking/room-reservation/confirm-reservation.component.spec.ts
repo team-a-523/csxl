@@ -46,6 +46,10 @@ describe('ConfirmReservationComponent', () => {
     }
   };
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     roomReservationServiceMock.getReservationObservable.mockReturnValue(of(MOCK_RESERVATION));
