@@ -1,8 +1,3 @@
-module.exports = {
-  preset: 'jest-preset-angular',
-  setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
-  testMatch: ['**/test/**/*.spec.ts'],
-  moduleNameMapper: {
-    '^src/(.*)$': '<rootDir>/src/$1'
-  }
-};
+const tsConfig = require('./jest.config.ts');
+
+module.exports = tsConfig.default || tsConfig;
