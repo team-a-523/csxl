@@ -53,7 +53,7 @@ describe('AdminRoomComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-    expect(component.rooms()).toHaveLength(1);
+    expect(component.rooms().length).toBe(1);
   });
 
   it('createRoom and updateRoom navigate to room editor', () => {

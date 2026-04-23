@@ -86,6 +86,6 @@ describe('academics models', () => {
     };
 
     expect(member.member_role).toBe('Instructor');
-    expect(partial.member_role).toBe('UTA');
+    expect(partial.member_role).toBe(RosterRole.UTA);
   });
 });

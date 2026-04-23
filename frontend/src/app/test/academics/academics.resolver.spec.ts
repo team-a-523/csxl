@@ -18,7 +18,12 @@ import {
   termsResolver
 } from 'src/app/academics/academics.resolver';
 import { AcademicsService } from 'src/app/academics/academics.service';
-import { Course, Room, Section, Term } from 'src/app/academics/academics.models';
+import {
+  Course,
+  Room,
+  Section,
+  Term
+} from 'src/app/academics/academics.models';
 
 const MOCK_TERM: Term = {
   id: '24F',
@@ -126,7 +131,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toEqual([MOCK_COURSE]);
+    expect(await result).toEqual([MOCK_COURSE]);
     expect(academicsServiceMock.getCourses).toHaveBeenCalled();
   });
 
@@ -152,7 +157,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toEqual(MOCK_COURSE);
+    expect(await result).toEqual(MOCK_COURSE);
     expect(academicsServiceMock.getCourse).toHaveBeenCalledWith('COMP110');
   });
 
@@ -170,7 +175,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toBeUndefined();
+    expect(await result).toBeUndefined();
   });
 
   it('termsResolver returns terms from service', async () => {
@@ -185,7 +190,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toEqual([MOCK_TERM]);
+    expect(await result).toEqual([MOCK_TERM]);
     expect(academicsServiceMock.getTerms).toHaveBeenCalled();
   });
 
@@ -201,7 +206,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toEqual(MOCK_TERM);
+    expect(await result).toEqual(MOCK_TERM);
     expect(academicsServiceMock.getCurrentTerm).toHaveBeenCalled();
   });
 
@@ -219,7 +224,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toBeUndefined();
+    expect(await result).toBeUndefined();
   });
 
   it('termResolver returns blank term when id is new', () => {
@@ -245,7 +250,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toEqual(MOCK_TERM);
+    expect(await result).toEqual(MOCK_TERM);
     expect(academicsServiceMock.getTerm).toHaveBeenCalledWith('24F');
   });
 
@@ -263,7 +268,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toBeUndefined();
+    expect(await result).toBeUndefined();
   });
 
   it('sectionResolver returns blank section when id is new', () => {
@@ -289,7 +294,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toEqual(MOCK_SECTION);
+    expect(await result).toEqual(MOCK_SECTION);
     expect(academicsServiceMock.getSection).toHaveBeenCalledWith(1);
   });
 
@@ -307,11 +312,13 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toBeUndefined();
+    expect(await result).toBeUndefined();
   });
 
   it('sectionsResolver returns sections from hardcoded term service call', async () => {
-    academicsServiceMock.getSectionsByTerm24F.mockReturnValue(of([MOCK_SECTION]));
+    academicsServiceMock.getSectionsByTerm24F.mockReturnValue(
+      of([MOCK_SECTION])
+    );
 
     const resolver = sectionsResolver as ResolveFn<Section[]>;
     const result = TestBed.runInInjectionContext(() =>
@@ -323,7 +330,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toEqual([MOCK_SECTION]);
+    expect(await result).toEqual([MOCK_SECTION]);
     expect(academicsServiceMock.getSectionsByTerm24F).toHaveBeenCalled();
   });
 
@@ -339,7 +346,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toEqual([MOCK_ROOM]);
+    expect(await result).toEqual([MOCK_ROOM]);
     expect(academicsServiceMock.getRooms).toHaveBeenCalled();
   });
 
@@ -366,7 +373,7 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toEqual(MOCK_ROOM);
+    expect(await result).toEqual(MOCK_ROOM);
     expect(academicsServiceMock.getRoom).toHaveBeenCalledWith('SN014');
   });
 
@@ -384,6 +391,6 @@ describe('academics resolvers', () => {
       )
     );
 
-    await expect(result).resolves.toBeUndefined();
+    expect(await result).toBeUndefined();
   });
 });
