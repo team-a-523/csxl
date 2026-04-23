@@ -85,16 +85,16 @@ describe('AdminTermComponent', () => {
     expect(component.terms()).toEqual([]);
   });
 
-  it('should not set terms when getTerms fails', () => {
+  it('should throw when getTerms fails during component creation', () => {
     academicsServiceMock.getTerms.mockReturnValue(
       throwError(() => new Error('Network error'))
     );
 
-    fixture = TestBed.createComponent(AdminTermComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-
-    expect(component.terms()).toEqual([]);
+    expect(() => {
+      fixture = TestBed.createComponent(AdminTermComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    }).toThrow('Network error');
   });
 
   it('should navigate to new term editor when createTerm() is called', () => {
