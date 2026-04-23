@@ -87,16 +87,16 @@ describe('AdminCourseComponent', () => {
     expect(component.courses()).toEqual([]);
   });
 
-  it('should not set courses when getCourses fails', () => {
+  it('should throw when getCourses fails during component initialization', () => {
     academicsServiceMock.getCourses.mockReturnValue(
       throwError(() => new Error('Network error'))
     );
 
-    fixture = TestBed.createComponent(AdminCourseComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-
-    expect(component.courses()).toEqual([]);
+    expect(() => {
+      fixture = TestBed.createComponent(AdminCourseComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    }).toThrow('Network error');
   });
 
   it('should navigate to new course editor when createCourse() is called', () => {
