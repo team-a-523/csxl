@@ -52,15 +52,14 @@ export class ApplicationFormFieldWidget {
    * Logic from the dialog example on the Angular Material docs:
    * https://material.angular.io/components/chips/examples#chips-autocomplete
    */
-  removeSection(setion: ApplicationSectionChoice): void {
+  removeSection(section: ApplicationSectionChoice): void {
     this.selectedSections.update((sections) => {
-      let index = sections.indexOf(setion);
+      let index = sections.indexOf(section);
       if (index < 0) {
         return sections;
       }
 
-      sections.splice(index, 1);
-      return [...sections];
+      return sections.filter((_, i) => i !== index);
     });
   }
 }

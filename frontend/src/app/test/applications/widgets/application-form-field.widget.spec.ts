@@ -223,12 +223,13 @@ describe('ApplicationFormFieldWidget', () => {
     expect(component.selectedSections().length).toBe(0);
   });
 
-  it('removeSection does not mutate the original array reference — returns a new array', () => {
+  it('removeSection does not mutate the original array — returns a new array without the removed section', () => {
     component.selectedSections.set([SECTION_A, SECTION_B]);
     const before = component.selectedSections();
 
     component.removeSection(SECTION_A);
 
     expect(component.selectedSections()).not.toBe(before);
+    expect(before).toContain(SECTION_A); // original array was not mutated
   });
 });
