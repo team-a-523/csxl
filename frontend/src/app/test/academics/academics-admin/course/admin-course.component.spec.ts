@@ -53,7 +53,7 @@ describe('AdminCourseComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-    expect(component.courses()).toHaveLength(1);
+    expect(component.courses().length).toBe(1);
   });
 
   it('createCourse and updateCourse navigate to editor routes', () => {
