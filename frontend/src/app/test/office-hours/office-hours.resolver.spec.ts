@@ -22,7 +22,7 @@ function buildRoute(
 ): ActivatedRouteSnapshot {
   return {
     paramMap: {
-      get: (key: string) => (key === 'event_id' ? eventId : courseSiteId)
+      get: (key: string) => (key === 'event_id' ? eventId : null)
     } as unknown as ParamMap,
     parent: {
       paramMap: {
@@ -74,7 +74,8 @@ describe('officeHoursResolver', () => {
         type: 0,
         mode: 0,
         description: '',
-        location_description: ''
+        location_description: '',
+        course_site_id: 42
       });
     });
   });
