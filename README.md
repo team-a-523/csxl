@@ -6,6 +6,7 @@ The Experience Labs' (XL) mission is to accelerate technical experience and buil
 
 ## Developer Docs
 
+* [AGENTS.md](.agent/AGENTS.md) — Instructions for AI agents (Cursor, Copilot, Claude Code, etc.)
 * [Branch, Pull Request, and Code Review Practices](docs/branches.md)
 * [Database Concerns](docs/database.md)
 * [Authentication, Authorization, and Permissions](docs/auth.md)
