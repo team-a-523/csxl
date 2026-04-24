@@ -37,9 +37,12 @@ export class AdminCourseComponent {
     private snackBar: MatSnackBar,
     private academicsService: AcademicsService
   ) {
-    academicsService
-      .getCourses()
-      .subscribe((courses) => this.courses.set(courses));
+    academicsService.getCourses().subscribe({
+      next: (courses) => this.courses.set(courses),
+      error: () => {
+        this.snackBar.open('Failed to load courses.', '', { duration: 2000 });
+      }
+    });
   }
 
   /** Event handler to open the Course Editor to create a new course */

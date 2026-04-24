@@ -87,16 +87,21 @@ describe('AdminCourseComponent', () => {
     expect(component.courses()).toEqual([]);
   });
 
-  it('should throw when getCourses fails during component initialization', () => {
+  it('should show an error snack bar when getCourses fails during component initialization', () => {
     academicsServiceMock.getCourses.mockReturnValue(
       throwError(() => new Error('Network error'))
     );
 
-    expect(() => {
-      fixture = TestBed.createComponent(AdminCourseComponent);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-    }).toThrow('Network error');
+    fixture = TestBed.createComponent(AdminCourseComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component.courses()).toEqual([]);
+    expect(snackBarMock.open).toHaveBeenCalledWith(
+      'Failed to load courses.',
+      '',
+      { duration: 2000 }
+    );
   });
 
   it('should navigate to new course editor when createCourse() is called', () => {
