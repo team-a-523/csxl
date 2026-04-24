@@ -21,7 +21,7 @@ If any command fails, stop and fix the issue instead of ignoring it.
 
 ## Environment
 
-**Use the Dev Container.** Run \"Dev Container: Reopen in Container\" in VS Code. Requires `backend/.env` first—copy the variables from `docs/get_started.md` and set a strong `JWT_SECRET`.
+**Use the Dev Container.** Run `Dev Container: Reopen in Container` in VS Code. Requires `backend/.env` first—copy the variables from `docs/get_started.md` and set a strong `JWT_SECRET`.
 
 ## Build & Test
 
