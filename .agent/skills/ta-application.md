@@ -187,7 +187,7 @@ coverage = (enrollment / 60.0) - sum(
 | `GET` | `/assignments/{course_site_id}/csv` | `StreamingResponse` |
 | `GET` | `/conflict_check/{application_id}` | `ConflictCheck` |
 
-> **Route ordering matters:** `/admin/{term_id}`, `/summary/{term_id}`, `/conflict_check/{application_id}` must be registered before `/{course_site_id}` to avoid FastAPI path ambiguity.
+> **Routing note:** `/{course_site_id}` uses an `int` path parameter, so FastAPI's path parameter conversion prevents `/summary/...` and `/conflict_check/...` from being matched as course site IDs. Route declaration order is therefore not what disambiguates these paths in the current implementation.
 
 ---
 
