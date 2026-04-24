@@ -8,7 +8,6 @@
  */
 
 import { Component, WritableSignal, signal } from '@angular/core';
-import { Observable } from 'rxjs';
 import { permissionGuard } from 'src/app/permission.guard';
 import { Term } from '../../academics.models';
 import { Router } from '@angular/router';
@@ -39,8 +38,11 @@ export class AdminTermComponent {
     private snackBar: MatSnackBar,
     private academicsService: AcademicsService
   ) {
-    academicsService.getTerms().subscribe((terms) => {
-      this.terms.set(terms);
+    academicsService.getTerms().subscribe({
+      next: (terms) => this.terms.set(terms),
+      error: () => {
+        this.snackBar.open('Failed to load terms.', '', { duration: 2000 });
+      }
     });
   }
 
