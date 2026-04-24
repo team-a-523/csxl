@@ -1,5 +1,43 @@
 # Testing
 
+## Frontend
+
+### Test Runner
+
+Frontend tests use [Jest](https://jestjs.io/) with [jest-preset-angular](https://thymikee.github.io/jest-preset-angular/). **`npm test` (Jest) is the supported test runner** for all frontend specs.
+
+> **Note:** The Angular CLI `test` target in `angular.json` is still configured for Karma/Jasmine. Running `ng test` will use Karma and will **not** work with the Jest-based specs in this project. Always use `npm test` (or the explicit `npm run test:jest`) to run frontend tests.
+
+### Frontend CLI
+
+From the `frontend/` directory:
+
+```bash
+# Run all frontend tests (Jest)
+npm test
+
+# Equivalent explicit alias
+npm run test:jest
+
+# Run with coverage report
+npm run test:coverage
+
+# Run Karma/Jasmine via Angular CLI (not supported for the Jest specs)
+npm run test:karma
+```
+
+To run a specific spec file:
+
+```bash
+npm test -- --testPathPatterns="office-hours"
+```
+
+### Test Organization
+
+Frontend tests live under `frontend/src/app/test/` and are co-located by feature area (e.g. `office-hours/`, `coworking/`, `academics/`, `applications/`).
+
+---
+
 ## Backend
 
 ### Organization
@@ -8,8 +46,6 @@ Tests for `backend` code use [Pytest](https://doc.pytest.org/) and are organized
 with subdirectories that mirror the package structure.
 
 The file `backend/test/conftest.py` defines fixtures for automatically setting up and tearing down a test database for backend services to use.
-
-At present, we do not have automated front-end testing instrumented; this remains a goal.
 
 ### Pytest CLI
 
