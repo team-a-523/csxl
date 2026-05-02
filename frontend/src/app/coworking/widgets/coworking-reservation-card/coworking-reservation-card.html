@@ -32,6 +32,17 @@
 
   <mat-card-content>
     <coworking-reservation-facts [reservation]="reservation" />
+
+    @if (reservationCountdown$ | async; as reservationCountdown) {
+    <div
+      class="primary-container-background mt-3 flex flex-row items-center rounded-lg p-3">
+      <mat-icon class="text-[34px] min-w-[34px] size-[34px]">timer</mat-icon>
+      <div class="ml-[18px] flex flex-col justify-center">
+        <p class="m-0 text-sm">Time until your reservation</p>
+        <p class="m-0 text-lg font-medium">{{ reservationCountdown }}</p>
+      </div>
+    </div>
+    }
   </mat-card-content>
 
   <mat-card-actions class="flex! flex-col md:flex-row pb-4! gap-3! items-start md:items-stretch lg:justify-end">

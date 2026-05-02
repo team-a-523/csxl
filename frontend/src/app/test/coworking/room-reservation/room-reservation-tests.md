@@ -148,6 +148,38 @@ Sanity check that the component instantiates without errors.
 
 ---
 
+## CoworkingReservationCard
+
+The `CoworkingReservationCard` displays reservation details and actions. For room
+reservations, it also formats the countdown until the reservation starts.
+
+### Setup
+
+The component depends on `RoomReservationService`, `Router`, `MatSnackBar`, and
+`CoworkingService`. All four are mocked. The template is overridden to empty so
+the tests focus on the countdown behavior directly.
+
+### Tests
+
+**should create**
+Sanity check that the component instantiates without errors.
+
+**formatReservationCountdown()**
+
+- _formats the time until a future room reservation_ — Passes a confirmed room
+  reservation and a fixed current time, then asserts the countdown includes the
+  expected hours, minutes, and seconds.
+
+- _includes days when the reservation is more than 24 hours away_ — Uses a start
+  time more than two days in the future and asserts the formatted string includes
+  days plus padded hours, minutes, and seconds.
+
+- _returns null when the reservation is not a future room reservation_ — Covers
+  reservations that have already started, are not room reservations, or are still
+  drafts so the countdown panel stays hidden.
+
+---
+
 ## ReservationTableService
 
 The `ReservationTableService` manages the state of the reservation table UI —

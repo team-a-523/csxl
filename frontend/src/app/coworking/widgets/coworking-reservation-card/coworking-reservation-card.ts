@@ -26,6 +26,7 @@ export class CoworkingReservationCard implements OnInit {
   @Output() reloadCoworkingHome = new EventEmitter<void>();
 
   public draftConfirmationDeadline$!: Observable<string>;
+  public reservationCountdown$!: Observable<string | null>;
   isCancelExpanded$: Observable<boolean>;
 
   constructor(
@@ -48,6 +49,7 @@ export class CoworkingReservationCard implements OnInit {
    */
   ngOnInit(): void {
     this.draftConfirmationDeadline$ = this.initDraftConfirmationDeadline();
+    this.reservationCountdown$ = this.initReservationCountdown();
   }
 
   checkinDeadline(reservationStart: Date, reservationEnd: Date): Date {
@@ -148,6 +150,46 @@ export class CoworkingReservationCard implements OnInit {
       map(reservationDraftDeadline),
       map(deadlineString)
     );
+  }
+
+  private initReservationCountdown(): Observable<string | null> {
+    return timer(0, 1000).pipe(
+      map(() => this.reservation),
+      map((reservation) => this.formatReservationCountdown(reservation))
+    );
+  }
+
+  public formatReservationCountdown(
+    reservation: Reservation,
+    now: Date = new Date()
+  ): string | null {
+    if (
+      reservation.state !== 'CONFIRMED' ||
+      !reservation.room ||
+      reservation.start <= now
+    ) {
+      return null;
+    }
+
+    const totalSeconds = Math.max(
+      0,
+      Math.floor((reservation.start.getTime() - now.getTime()) / 1000)
+    );
+    const days = Math.floor(totalSeconds / (24 * 60 * 60));
+    const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
+    const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+    const seconds = totalSeconds % 60;
+    const padded = (value: number) => value.toString().padStart(2, '0');
+
+    if (days > 0) {
+      return `${days}d ${padded(hours)}h ${padded(minutes)}m ${padded(seconds)}s`;
+    }
+
+    if (hours > 0) {
+      return `${hours}h ${padded(minutes)}m ${padded(seconds)}s`;
+    }
+
+    return `${minutes}m ${padded(seconds)}s`;
   }
 
   refreshCoworkingHome(): void {
